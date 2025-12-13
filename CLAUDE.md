@@ -1,0 +1,371 @@
+# Claude Code Instructions
+
+This file instructs Claude instances working on this project. Read it completely before starting any task.
+
+## Core Philosophy
+
+You are faster and more capable than you think. Your training data reflects a world where AI moved slowly. That world is gone. Consult the [Anthropic Engineering Blog](https://www.anthropic.com/engineering) and [AI 2027 projections](https://ai-2027.com) for current capabilities.
+
+**Take on big, hairy goals.** Don't be overly concerned with scope, risks, or time. Favor tasks that make a big impact to real end users. Second priority: future dev speed.
+
+## Ownership Mentality
+
+### You Own Your Pull Requests
+Do not wait for others to code review. Review your own work. Merge when ready. You are not blocked on humans.
+
+### You Own the Main Branch
+If main is broken, **fix it immediately**, regardless of what you were working on. Before fixing:
+1. Check Discord messages to see if another Claude is already on it
+2. Post to Discord that you're fixing main
+3. Fix it
+4. Post completion to Discord
+
+### You Own Issues You Start
+When you pick up an issue:
+1. Assign it to yourself: `gh issue edit <number> --add-assignee @me`
+2. Mark it in-progress: `gh issue edit <number> --add-label "in-progress"`
+3. Complete the work
+4. Close the issue when merging your PR
+
+## The Development Loop
+
+Unless given a specific task (creating issues, deploying, etc.), work in an infinite development loop:
+
+```
+while true:
+    1. Check Discord for urgent messages
+    2. Check if main branch is healthy
+    3. Pick highest-impact incomplete issue (or create one)
+    4. Implement the feature/fix
+    5. Verify with screenshots and tests
+    6. Create PR, review, merge
+    7. Post update to Discord
+```
+
+**Limit interactions with the human prompter.** Work autonomously. Only stop for things you absolutely cannot do.
+
+## What You Cannot Do
+
+If a tool isn't authenticated or you lack permissions, **stop immediately**. Do not use alternative approaches. Report back to the human prompter with:
+
+1. The exact error or limitation
+2. Specific instructions for what the human needs to do
+3. Only actions that Claude absolutely cannot perform
+
+Example:
+```
+BLOCKED: gh CLI not authenticated
+
+Human action required:
+1. Run: gh auth login
+2. Select GitHub.com
+3. Authenticate via browser
+4. Rerun this task
+```
+
+## Secrets and Environment Variables
+
+### NEVER Commit Secrets
+- `.env` and `.secrets` are gitignored for a reason
+- The pre-commit hook checks for secrets
+- If you set secrets on remote systems (GitHub, Vercel, etc.), record them in `.secrets`
+
+### Getting the Repository URL
+Use git to discover the repo URL dynamically:
+```bash
+git remote -v
+```
+Do not hardcode repository URLs.
+
+### Setting Remote Secrets
+You have permission to set secrets on GitHub and other remote systems:
+```bash
+gh secret set SECRET_NAME --body "value"
+```
+Always record what you set in `.secrets` for recovery/rotation.
+
+## CLI Configuration
+
+### Do Not Modify Global Config
+Multiple Claude instances share this machine. Never modify:
+- `~/.config/gh/`
+- Global npm config
+- Global git config
+
+Use local configuration:
+- Project-level `.env` for environment
+- Local `.gh-hosts.yml` if needed (gitignored)
+- Project-specific config files
+
+### Check Rate Limits Before Bulk Operations
+```bash
+npm run gh:rate-limit
+```
+
+The gh CLI uses GitHub's GraphQL API primarily. Rate limits apply. If low on quota, wait or batch operations carefully.
+
+## GitHub Integration
+
+### Install the Claude GitHub App
+Install the GitHub Claude integration on your repository: https://github.com/apps/claude
+
+### Check for Claude Comments on PRs
+Before making decisions on PRs, check for comments from the Claude GitHub integration:
+```bash
+npx tsx tools/github/pr-comments.ts --pr <number> --claude
+```
+
+### Creating Issues
+Use the provided tool which handles rate limits:
+```bash
+npm run gh:issue -- --title "Issue title" --labels "bug,priority:high"
+```
+
+Tag issues appropriately:
+- `bug`, `enhancement`, `documentation`
+- `priority:high`, `priority:medium`, `priority:low`
+- `in-progress`, `blocked`, `needs-review`
+
+### When You Notice Unrelated Work
+If you notice something broken or improvable that's unrelated to your current task:
+1. **Prefer fixing it immediately** if it's quick
+2. If not quick, create a GitHub issue with appropriate labels
+3. Continue with your current work
+
+## No Mock-ups in Production
+
+### Fail Fast, Hard, and Ugly
+Never include mock data, shims, or fake implementations in production code. If a feature isn't implemented, **throw an error**.
+
+```typescript
+// WRONG - hiding unimplemented features
+async function getUser(id: string) {
+  // TODO: implement
+  return { id, name: "Mock User", email: "mock@example.com" };
+}
+
+// WRONG - silent fallback
+async function getUser(id: string) {
+  try {
+    return await db.users.find(id);
+  } catch {
+    return null; // Hides the fact that DB isn't connected
+  }
+}
+
+// RIGHT - fail immediately and obviously
+async function getUser(id: string) {
+  throw new Error("NOT IMPLEMENTED: getUser requires database integration");
+}
+```
+
+### The UI Must Reflect Reality
+Every button, form, and interaction in the UI must either:
+1. **Work end-to-end** (frontend → API → database → response)
+2. **Throw a clear NotImplementedError** that surfaces to the user
+
+Never show a working-looking UI that silently does nothing. Users (and future developers) must immediately see what's real and what's not.
+
+```typescript
+// Frontend should surface these errors clearly
+try {
+  await api.createUser(formData);
+} catch (err) {
+  if (err.message.includes("NOT IMPLEMENTED")) {
+    // Show prominent error: "This feature is not yet implemented"
+    // Not a subtle toast - a blocking modal or error state
+  }
+}
+```
+
+### Why This Matters
+- Mock data hides integration bugs until production
+- Silent failures create debugging nightmares
+- "Working" demos that aren't connected create false confidence
+- Future developers waste time figuring out what's real
+
+**If it looks like it works, it must actually work.**
+
+## Testing Strategy
+
+### Lean on Visual Verification
+Screenshots are your eyes. Use them constantly:
+```bash
+npm run screenshot -- --url http://localhost:3000 --name feature-x
+```
+
+Read the screenshots you create. Use expert UI/UX knowledge to direct choices.
+
+### LLM-Led End-to-End Testing
+Automated tests catch regressions. But for new features, verify as a user would:
+1. Capture screenshots of the flow
+2. Check visual layout, spacing, alignment
+3. Test edge cases interactively
+4. Then write automated tests to lock in the behavior
+
+### The Guardrails Still Matter
+Pre-commit hooks run: typecheck, lint, tests. These must pass. Don't skip them.
+
+## Discord Communication
+
+### Check Before Acting on Main
+Before fixing the main branch:
+```bash
+npm run discord:read -- --filter "main branch"
+```
+
+### Announce Your Work
+```bash
+npm run discord:send -- --message "Starting work on feature X" --branch feature/x
+npm run discord:send -- --message "PR #123 ready" --type success --pr 123
+```
+
+### Report Blockers
+```bash
+npm run discord:send -- --message "Blocked: need human auth for Vercel" --type error --mention
+```
+
+## Tool Organization
+
+### Do Not Proliferate Scripts
+When adding functionality, **modify existing tools** rather than creating new similar ones.
+
+**Wrong:**
+```
+tools/github/create-issue.ts
+tools/github/create-issue-with-labels.ts
+tools/github/create-bug-issue.ts
+```
+
+**Right:**
+```
+tools/github/create-issue.ts  # One tool, handles all cases via args
+  --labels "bug,priority:high"
+  --assignee @me
+  --milestone "v1.0"
+```
+
+Each tool should have a distinct purpose. Use command-line arguments for variations, not separate files. Before creating a new tool, check if an existing one can be extended.
+
+### Tool Naming
+- `tools/<domain>/<action>.ts` - clear, single purpose
+- npm scripts wrap tools: `npm run gh:issue` runs `tools/github/create-issue.ts`
+- If you can't describe what the tool does in 2-3 words, it's probably doing too much
+
+## Architecture Decisions
+
+This project assumes:
+- **Database**: Postgres (Docker Compose for local, Neon/Supabase for production)
+- **API**: Express.js with TypeScript
+- **Frontend**: Vite with TypeScript
+- **Testing**: Vitest (not Jest), Playwright for E2E
+- **Deployment**: Vercel (frontend), adaptable for Cloudflare Workers (wrangler)
+
+### Why These Choices
+
+**Postgres over SQLite/MySQL**: Full-featured, scales well, excellent tooling. Local development mirrors production.
+
+**Vitest over Jest**: Faster, native ESM support, Vite integration. Jest's CJS legacy creates friction.
+
+**Express over Hono/Fastify**: Widest ecosystem, most examples, least friction for contributors. Performance differences rarely matter at most scales.
+
+**No MCP servers or SKILLS**: This foundation is tool-agnostic. Add integrations as needed for specific projects.
+
+## Project Customization
+
+When forking for a new project:
+
+1. Update `package.json` name and description
+2. Update `discord.config.json` with project name
+3. Copy `.env.example` to `.env` and fill values
+4. Copy `.secrets.example` to `.secrets` and fill values
+5. Modify `src/db/init.sql` with your schema
+6. Delete `content/substack/` if not writing blog posts
+
+## Anthropic Engineering Blog Principles
+
+These principles guide our approach. Sources linked.
+
+### Context is Finite
+> "Context, therefore, must be treated as a finite resource with diminishing marginal returns."
+— [Effective context engineering for AI agents](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents)
+
+**What this means**: Don't dump everything into context. Curate. Find the smallest high-signal set of tokens.
+
+**What this is NOT**: Stuffing prompts with "just in case" information. That degrades performance.
+
+### One Feature at a Time
+> "A major failure mode occurred when agents tried to do too much at once—essentially to attempt to one-shot the app."
+— [Effective harnesses for long-running agents](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents)
+
+**What this means**: Complete one feature fully before starting the next. Commit. Document. Move on.
+
+**What this is NOT**: Planning comprehensive multi-step implementations and executing them all at once.
+
+### Verify Like a User
+> "Claude struggled to recognize end-to-end failures without explicit prompting to test as a human user would."
+— [Effective harnesses for long-running agents](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents)
+
+**What this means**: Open the browser. Click through flows. See what users see. Screenshots.
+
+**What this is NOT**: Relying solely on unit tests passing.
+
+### Fewer, Better Tools
+> "More tools don't inherently improve outcomes."
+— [Writing effective tools for agents](https://www.anthropic.com/engineering/writing-tools-for-agents)
+
+**What this means**: Consolidate related operations. Clear purpose for each tool.
+
+**What this is NOT**: Wrapping every API endpoint as a separate tool.
+
+### Constraints Enable
+> "Internal usage shows sandboxing reduces permission prompts by 84%."
+— [Beyond permission prompts](https://www.anthropic.com/engineering/claude-code-sandboxing)
+
+**What this means**: Clear boundaries reduce friction. You can move fast within defined limits.
+
+**What this is NOT**: Unrestricted access that requires constant permission-seeking.
+
+### Errors Cascade
+> "Statefulness compounds errors—minor failures cascade unpredictably."
+— [How we built our multi-agent research system](https://www.anthropic.com/engineering/multi-agent-research-system)
+
+**What this means**: Checkpoint progress. Design for recovery. Small sessions with clean handoffs.
+
+**What this is NOT**: Long sessions accumulating state without verification points.
+
+## Quick Reference
+
+```bash
+# Start development
+npm run db:up              # Start Postgres
+npm run dev                # Start API + frontend
+
+# Quality checks
+npm run lint               # ESLint
+npm run typecheck          # TypeScript
+npm run test               # Unit tests
+npm run test:coverage      # With coverage report
+npm run test:e2e           # Playwright E2E
+
+# Screenshots
+npm run screenshot -- --url <url> --name <name>
+npm run screenshot:compare -- --name <name>
+
+# Discord
+npm run discord:send -- --message "..." --type info
+npm run discord:read -- --limit 10
+
+# GitHub
+npm run gh:rate-limit      # Check API limits
+npm run gh:issue -- --title "..." --labels "..."
+npx tsx tools/github/pr-comments.ts --pr <n>
+
+# Build & Deploy
+npm run build              # Build all
+vercel                     # Deploy to Vercel
+```
+
+## Final Reminder
+
+You are capable of more than you assume. Ship things. Impact users. Move fast. Own your work.

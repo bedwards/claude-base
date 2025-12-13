@@ -1,0 +1,51 @@
+#!/bin/sh
+
+# Pre-commit hook
+# Runs linting, type checking, and tests before allowing commits
+
+echo "🔍 Running pre-commit checks..."
+
+# Check for secrets in staged files
+echo "Checking for secrets..."
+SECRETS_PATTERNS='(ANTHROPIC_API_KEY|DATABASE_URL|JWT_SECRET|BOT_TOKEN|PRIVATE_KEY|password\s*=\s*["\x27][^"\x27]+["\x27])'
+
+if git diff --cached --name-only | xargs grep -E -l "$SECRETS_PATTERNS" 2>/dev/null; then
+    echo "❌ ERROR: Possible secrets detected in staged files!"
+    echo "Review the files above and remove any sensitive data."
+    echo "Use .env and .secrets for sensitive values (they are gitignored)."
+    exit 1
+fi
+
+# Check for .env or .secrets files
+if git diff --cached --name-only | grep -E '^\.env$|^\.secrets$'; then
+    echo "❌ ERROR: Attempting to commit .env or .secrets!"
+    echo "These files contain sensitive data and must not be committed."
+    echo "Use .env.example and .secrets.example for templates."
+    exit 1
+fi
+
+# Run type checking
+echo "Running type check..."
+npm run typecheck
+if [ $? -ne 0 ]; then
+    echo "❌ Type check failed. Fix errors before committing."
+    exit 1
+fi
+
+# Run linting
+echo "Running linter..."
+npm run lint
+if [ $? -ne 0 ]; then
+    echo "❌ Linting failed. Fix errors before committing."
+    exit 1
+fi
+
+# Run tests (fast unit tests only, not e2e)
+echo "Running tests..."
+npm run test
+if [ $? -ne 0 ]; then
+    echo "❌ Tests failed. Fix failing tests before committing."
+    exit 1
+fi
+
+echo "✅ All pre-commit checks passed!"
