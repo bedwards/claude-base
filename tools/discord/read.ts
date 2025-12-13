@@ -64,7 +64,7 @@ async function readMessages(options: ReadOptions): Promise<DiscordMessage[]> {
     throw new Error(`Discord API failed: ${response.status} ${text}`);
   }
 
-  let messages: DiscordMessage[] = await response.json();
+  let messages = await response.json() as DiscordMessage[];
 
   if (options.filter) {
     const filterLower = options.filter.toLowerCase();
@@ -93,8 +93,8 @@ function formatMessage(msg: DiscordMessage): string {
 
   if (msg.embeds?.length) {
     for (const embed of msg.embeds) {
-      if (embed.title) output += `  📋 ${embed.title}\n`;
-      if (embed.description) output += `  ${embed.description}\n`;
+      if (embed.title) {output += `  📋 ${embed.title}\n`;}
+      if (embed.description) {output += `  ${embed.description}\n`;}
     }
   }
 
@@ -141,8 +141,8 @@ if (import.meta.url === `file://${process.argv[1]}`) {
         console.info(formatMessage(msg));
       }
     })
-    .catch(err => {
-      console.error('Failed to read messages:', err.message);
+    .catch((err: unknown) => {
+      console.error('Failed to read messages:', err instanceof Error ? err.message : String(err));
       process.exit(1);
     });
 }

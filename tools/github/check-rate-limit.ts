@@ -45,7 +45,7 @@ interface GhRateLimitResponse {
   };
 }
 
-export async function checkRateLimit(): Promise<RateLimitInfo> {
+export function checkRateLimit(): RateLimitInfo {
   try {
     // Use gh api to check rate limit
     // gh CLI handles auth automatically
@@ -55,7 +55,7 @@ export async function checkRateLimit(): Promise<RateLimitInfo> {
       env: { ...process.env },
     });
 
-    const data: GhRateLimitResponse = JSON.parse(result);
+    const data = JSON.parse(result) as GhRateLimitResponse;
 
     return {
       core: {
@@ -111,20 +111,19 @@ ${formatResource('GraphQL API', info.graphql)}
 
 // Run if called directly
 if (import.meta.url === `file://${process.argv[1]}`) {
-  checkRateLimit()
-    .then(info => {
-      console.info(formatRateLimit(info));
+  try {
+    const info = checkRateLimit();
+    console.info(formatRateLimit(info));
 
-      if (!canMakeRequests(info, 10)) {
-        console.warn('\n⚠️  Low on API requests. Consider waiting before bulk operations.');
-        const waitMs = getWaitTime(info);
-        if (waitMs > 0) {
-          console.warn(`   Rate limit resets in ${Math.ceil(waitMs / 60000)} minutes`);
-        }
+    if (!canMakeRequests(info, 10)) {
+      console.warn('\n⚠️  Low on API requests. Consider waiting before bulk operations.');
+      const waitMs = getWaitTime(info);
+      if (waitMs > 0) {
+        console.warn(`   Rate limit resets in ${Math.ceil(waitMs / 60000)} minutes`);
       }
-    })
-    .catch(err => {
-      console.error('Error:', err.message);
-      process.exit(1);
-    });
+    }
+  } catch (err: unknown) {
+    console.error('Error:', err instanceof Error ? err.message : String(err));
+    process.exit(1);
+  }
 }

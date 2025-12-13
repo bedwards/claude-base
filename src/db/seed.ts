@@ -28,7 +28,7 @@ async function seed() {
   }
 }
 
-seed().catch(err => {
+seed().catch((err: unknown) => {
   console.error('Seeding failed:', err);
   process.exit(1);
 });

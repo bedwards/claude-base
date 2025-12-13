@@ -169,9 +169,9 @@ function copyDir(src: string, dest: string, options: InitOptions, baseDir: strin
 
 function updatePackageJson(targetDir: string, name: string): void {
   const pkgPath = join(targetDir, 'package.json');
-  if (!existsSync(pkgPath)) return;
+  if (!existsSync(pkgPath)) {return;}
 
-  const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8'));
+  const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8')) as Record<string, unknown>;
   pkg.name = name;
   pkg.version = '0.1.0';
   pkg.description = `${name} - built on claude-base`;
@@ -182,9 +182,9 @@ function updatePackageJson(targetDir: string, name: string): void {
 
 function updateDiscordConfig(targetDir: string, name: string): void {
   const configPath = join(targetDir, 'discord.config.json');
-  if (!existsSync(configPath)) return;
+  if (!existsSync(configPath)) {return;}
 
-  const config = JSON.parse(readFileSync(configPath, 'utf-8'));
+  const config = JSON.parse(readFileSync(configPath, 'utf-8')) as Record<string, unknown>;
   config.projectName = name;
 
   writeFileSync(configPath, JSON.stringify(config, null, 2) + '\n');
@@ -202,7 +202,7 @@ function initGit(targetDir: string): void {
 
 function makeHooksExecutable(targetDir: string): void {
   const huskyDir = join(targetDir, '.husky');
-  if (!existsSync(huskyDir)) return;
+  if (!existsSync(huskyDir)) {return;}
 
   try {
     const hooks = readdirSync(huskyDir).filter(f => !f.startsWith('.'));

@@ -161,8 +161,8 @@ function parseArgs(): MessageOptions {
 // Run if called directly
 if (import.meta.url === `file://${process.argv[1]}`) {
   const options = parseArgs();
-  sendMessage(options).catch(err => {
-    console.error('Failed to send message:', err.message);
+  sendMessage(options).catch((err: unknown) => {
+    console.error('Failed to send message:', err instanceof Error ? err.message : String(err));
     process.exit(1);
   });
 }

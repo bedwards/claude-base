@@ -34,8 +34,8 @@ interface GhComment {
   url: string;
 }
 
-export async function getPrComments(prNumber: number): Promise<PrComment[]> {
-  const rateLimit = await checkRateLimit();
+export function getPrComments(prNumber: number): PrComment[] {
+  const rateLimit = checkRateLimit();
 
   if (!canMakeRequests(rateLimit, 3)) {
     throw new Error('Rate limit too low to fetch PR comments.');
@@ -51,7 +51,7 @@ export async function getPrComments(prNumber: number): Promise<PrComment[]> {
       }
     );
 
-    const comments: GhComment[] = JSON.parse(result || '[]');
+    const comments = JSON.parse(result || '[]') as GhComment[];
 
     return comments.map(c => ({
       id: c.id,
@@ -69,13 +69,13 @@ export async function getPrComments(prNumber: number): Promise<PrComment[]> {
   }
 }
 
-export async function getClaudeComments(prNumber: number): Promise<PrComment[]> {
-  const comments = await getPrComments(prNumber);
+export function getClaudeComments(prNumber: number): PrComment[] {
+  const comments = getPrComments(prNumber);
   return comments.filter(c => c.isFromClaude);
 }
 
-export async function getReviewComments(prNumber: number): Promise<PrComment[]> {
-  const rateLimit = await checkRateLimit();
+export function getReviewComments(prNumber: number): PrComment[] {
+  const rateLimit = checkRateLimit();
 
   if (!canMakeRequests(rateLimit, 3)) {
     throw new Error('Rate limit too low to fetch review comments.');
@@ -91,9 +91,16 @@ export async function getReviewComments(prNumber: number): Promise<PrComment[]> 
       }
     );
 
-    const comments = JSON.parse(result || '[]');
+    interface ReviewComment {
+      id: number;
+      user: { login: string };
+      body: string;
+      created_at: string;
+      html_url: string;
+    }
+    const comments = JSON.parse(result || '[]') as ReviewComment[];
 
-    return comments.map((c: { id: number; user: { login: string }; body: string; created_at: string; html_url: string }) => ({
+    return comments.map((c) => ({
       id: c.id,
       author: c.user.login,
       body: c.body,
@@ -162,10 +169,10 @@ function parseArgs(): { prNumber: number; filter?: string; claudeOnly: boolean }
 if (import.meta.url === `file://${process.argv[1]}`) {
   const { prNumber, filter, claudeOnly } = parseArgs();
 
-  (async () => {
+  try {
     let comments = claudeOnly
-      ? await getClaudeComments(prNumber)
-      : await getPrComments(prNumber);
+      ? getClaudeComments(prNumber)
+      : getPrComments(prNumber);
 
     if (filter) {
       const filterLower = filter.toLowerCase();
@@ -177,17 +184,16 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 
     if (comments.length === 0) {
       console.info(`No${claudeOnly ? ' Claude' : ''} comments found on PR #${prNumber}`);
-      return;
+    } else {
+      console.info(`Found ${comments.length} comments on PR #${prNumber}:\n`);
+      for (const comment of comments) {
+        console.info(formatComment(comment));
+      }
     }
-
-    console.info(`Found ${comments.length} comments on PR #${prNumber}:\n`);
-    for (const comment of comments) {
-      console.info(formatComment(comment));
-    }
-  })().catch(err => {
-    console.error('Error:', err.message);
+  } catch (err: unknown) {
+    console.error('Error:', err instanceof Error ? err.message : String(err));
     process.exit(1);
-  });
+  }
 }
 
 export { getPrComments as default };

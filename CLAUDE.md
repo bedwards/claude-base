@@ -115,6 +115,51 @@ The pre-commit hook runs quickly (a few seconds) and catches:
 
 If the hook fails, **fix the issue**. Don't bypass it.
 
+## Lint Philosophy
+
+### Zero Warnings, Zero Exceptions
+
+**Warnings are an anti-pattern.** Either a rule matters (make it an error) or it doesn't (turn it off). Never leave rules as warnings—they become noise that gets ignored.
+
+Sources:
+- [ESLint Warnings Are an Anti-Pattern](https://dev.to/thawkin3/eslint-warnings-are-an-anti-pattern-33np)
+- [typescript-eslint Shared Configs](https://typescript-eslint.io/users/configs/)
+
+### Our Approach
+
+1. **Useful rules = errors**: Fix immediately. No exceptions.
+2. **Useless rules = off**: Disabled globally so they don't clutter output.
+3. **Never ignore useful warnings**: If a rule catches real bugs, keep it as an error.
+4. **Never count useless warnings**: Disable them completely; don't just ignore inline.
+
+### Rules We Keep (Errors)
+
+These catch real bugs:
+- `@typescript-eslint/no-floating-promises` - Unhandled promises cause silent failures
+- `@typescript-eslint/no-misused-promises` - Promise misuse in wrong contexts
+- `@typescript-eslint/no-unsafe-*` - Catches accidental `any` leakage
+- `@typescript-eslint/no-explicit-any` - Forces conscious decision about type safety
+- `curly` - Prevents bugs when adding statements to single-line blocks
+- `@typescript-eslint/prefer-ts-expect-error` - Fails when suppression no longer needed
+
+### Rules We Disable (Off)
+
+These are noisy or redundant:
+- `@typescript-eslint/explicit-function-return-type` - TypeScript infers this
+- `@typescript-eslint/no-non-null-assertion` - The `!` operator is a useful escape hatch
+- `@typescript-eslint/restrict-template-expressions` - Overly pedantic
+- `@typescript-eslint/no-unnecessary-condition` - False positives with arrays
+
+### Fix It Now
+
+When you see a lint error:
+1. **Fix it immediately.** Don't add `eslint-disable` comments.
+2. If you must disable a rule, explain why in a comment.
+3. Never increase the warning count.
+4. Run `npm run lint` before every commit (pre-commit hook does this).
+
+The lint configuration is in `eslint.config.js` with detailed comments explaining each rule.
+
 ## CLI Configuration
 
 ### Do Not Modify Global Config

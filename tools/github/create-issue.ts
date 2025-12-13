@@ -50,9 +50,9 @@ const STANDARD_LABELS = [
   'wontfix',
 ];
 
-export async function createIssue(options: IssueOptions): Promise<CreatedIssue> {
+export function createIssue(options: IssueOptions): CreatedIssue {
   // Check rate limits first
-  const rateLimit = await checkRateLimit();
+  const rateLimit = checkRateLimit();
 
   if (!canMakeRequests(rateLimit, 5)) {
     const waitMs = getWaitTime(rateLimit);
@@ -109,8 +109,8 @@ export async function createIssue(options: IssueOptions): Promise<CreatedIssue> 
   }
 }
 
-export async function assignIssue(issueNumber: number, assignee: string): Promise<void> {
-  const rateLimit = await checkRateLimit();
+export function assignIssue(issueNumber: number, assignee: string): void {
+  const rateLimit = checkRateLimit();
 
   if (!canMakeRequests(rateLimit, 2)) {
     throw new Error('Rate limit too low for assignment.');
@@ -126,8 +126,8 @@ export async function assignIssue(issueNumber: number, assignee: string): Promis
   }
 }
 
-export async function markInProgress(issueNumber: number): Promise<void> {
-  const rateLimit = await checkRateLimit();
+export function markInProgress(issueNumber: number): void {
+  const rateLimit = checkRateLimit();
 
   if (!canMakeRequests(rateLimit, 2)) {
     throw new Error('Rate limit too low for labeling.');
@@ -212,13 +212,12 @@ function parseArgs(): IssueOptions {
 // Run if called directly
 if (import.meta.url === `file://${process.argv[1]}`) {
   const options = parseArgs();
-  createIssue(options)
-    .then(issue => {
-      console.info(`Created issue #${issue.number}`);
-      console.info(`URL: ${issue.url}`);
-    })
-    .catch(err => {
-      console.error('Error:', err.message);
-      process.exit(1);
-    });
+  try {
+    const issue = createIssue(options);
+    console.info(`Created issue #${issue.number}`);
+    console.info(`URL: ${issue.url}`);
+  } catch (err: unknown) {
+    console.error('Error:', err instanceof Error ? err.message : String(err));
+    process.exit(1);
+  }
 }

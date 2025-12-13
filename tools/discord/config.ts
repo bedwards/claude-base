@@ -32,7 +32,7 @@ function loadProjectConfig(): Partial<DiscordConfig> {
   if (existsSync(configPath)) {
     try {
       const content = readFileSync(configPath, 'utf-8');
-      return JSON.parse(content);
+      return JSON.parse(content) as Partial<DiscordConfig>;
     } catch {
       console.warn('Failed to parse discord.config.json');
     }

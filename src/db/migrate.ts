@@ -26,7 +26,7 @@ async function migrate() {
     const { rows: applied } = await client.query(
       'SELECT name FROM app.migrations ORDER BY id'
     );
-    const appliedNames = new Set(applied.map(r => r.name));
+    const appliedNames = new Set(applied.map((r: { name: string }) => r.name));
 
     // Get migration files
     const migrationsDir = join(import.meta.dirname, 'migrations');
@@ -43,7 +43,7 @@ async function migrate() {
 
     // Apply pending migrations
     for (const file of files) {
-      if (appliedNames.has(file)) continue;
+      if (appliedNames.has(file)) {continue;}
 
       console.info(`Applying migration: ${file}`);
       const sql = readFileSync(join(migrationsDir, file), 'utf-8');
@@ -70,7 +70,7 @@ async function migrate() {
   }
 }
 
-migrate().catch(err => {
+migrate().catch((err: unknown) => {
   console.error('Migration failed:', err);
   process.exit(1);
 });
