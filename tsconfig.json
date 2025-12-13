@@ -20,6 +20,6 @@
       "@tools/*": ["tools/*"]
     }
   },
-  "include": ["src/**/*", "tools/**/*", "*.config.ts"],
+  "include": ["src/**/*", "tools/**/*", "bin/**/*", "tests/**/*", "*.config.ts"],
   "exclude": ["node_modules", "dist"]
 }

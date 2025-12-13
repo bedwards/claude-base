@@ -167,4 +167,5 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   });
 }
 
-export { sendMessage, MessageOptions };
+export { sendMessage };
+export type { MessageOptions };

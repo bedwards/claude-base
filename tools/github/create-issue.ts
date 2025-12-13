@@ -89,7 +89,7 @@ export async function createIssue(options: IssueOptions): Promise<CreatedIssue> 
     const result = execSync(args.join(' '), {
       encoding: 'utf-8',
       env: { ...process.env },
-      shell: true,
+      shell: '/bin/sh',
     });
 
     // gh issue create returns the URL of the created issue
@@ -140,7 +140,7 @@ export async function markInProgress(issueNumber: number): Promise<void> {
       {
         encoding: 'utf-8',
         env: { ...process.env },
-        shell: true,
+        shell: '/bin/sh',
       }
     );
   } catch (err) {

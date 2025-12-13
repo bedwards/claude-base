@@ -15,7 +15,7 @@
  *   npm run discord:read -- --filter "main branch"
  */
 
-import { getConfig, type DiscordConfig } from './config.js';
+import { getConfig } from './config.js';
 
 interface DiscordMessage {
   id: string;
@@ -147,4 +147,5 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     });
 }
 
-export { readMessages, DiscordMessage, ReadOptions };
+export { readMessages };
+export type { DiscordMessage, ReadOptions };
