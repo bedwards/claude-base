@@ -307,4 +307,4 @@ This repo was created by Claude Code from a single prompt. The prompt is include
 
 ## License
 
-MIT
+[GNU Affero General Public License v3.0](LICENSE)
