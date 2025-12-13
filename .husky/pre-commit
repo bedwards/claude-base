@@ -28,6 +28,43 @@ if git diff --cached --name-only | grep -E '^\.env$|^\.secrets$'; then
     exit 1
 fi
 
+# Validate YAML frontmatter in markdown files
+echo "Checking YAML frontmatter..."
+CONTENT_MD_FILES=$(git diff --cached --name-only | grep -E '^content/.*\.md$')
+if [ -n "$CONTENT_MD_FILES" ]; then
+    for file in $CONTENT_MD_FILES; do
+        if [ -f "$file" ]; then
+            # Check if file has frontmatter (starts with ---)
+            if head -1 "$file" | grep -q '^---$'; then
+                # Extract frontmatter and validate with node
+                node -e "
+                    const fs = require('fs');
+                    const content = fs.readFileSync('$file', 'utf8');
+                    const match = content.match(/^---\n([\s\S]*?)\n---/);
+                    if (match) {
+                        const yaml = match[1];
+                        // Check for unquoted colons in values (common YAML error)
+                        const lines = yaml.split('\n');
+                        for (const line of lines) {
+                            if (line.match(/^[a-z]+:\s*[^\"'\[{].*:/i)) {
+                                console.error('YAML error: Value contains unquoted colon. Quote the value.');
+                                console.error('  File: $file');
+                                console.error('  Line: ' + line);
+                                process.exit(1);
+                            }
+                        }
+                    }
+                " 2>&1
+                if [ $? -ne 0 ]; then
+                    echo "❌ ERROR: Invalid YAML frontmatter in $file"
+                    echo "Tip: Quote values that contain colons, e.g., title: \"My Title: Subtitle\""
+                    exit 1
+                fi
+            fi
+        fi
+    done
+fi
+
 # Run type checking
 echo "Running type check..."
 npm run typecheck

@@ -1,6 +1,6 @@
 ---
-title: Vibe Coding: The Quiet Revolution in How Software Gets Made
-subtitle: What Anthropic's engineering team learned about AI agents that changes everything
+title: "Vibe Coding: The Quiet Revolution in How Software Gets Made"
+subtitle: "What Anthropic's engineering team learned about AI agents that changes everything"
 date: 2025-12-13
 tags: [ai, software-engineering, agents, anthropic, vibe-coding]
 status: draft

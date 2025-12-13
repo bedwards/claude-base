@@ -313,6 +313,34 @@ This project assumes:
 
 **No MCP servers or SKILLS**: This foundation is tool-agnostic. Add integrations as needed for specific projects.
 
+## Content Files (Substack/Blog)
+
+When writing markdown files in `content/`:
+
+### YAML Frontmatter Rules
+- **Always quote values containing colons**: `title: "My Title: A Subtitle"` not `title: My Title: A Subtitle`
+- The pre-commit hook validates frontmatter to catch this error
+- GitHub's markdown renderer will fail on invalid YAML
+
+```yaml
+# WRONG - will break GitHub rendering
+title: Vibe Coding: The Future
+
+# RIGHT - quoted value
+title: "Vibe Coding: The Future"
+```
+
+### Required Frontmatter Fields
+```yaml
+---
+title: "Your Title Here"
+subtitle: "Optional subtitle"
+date: 2025-12-13
+tags: [tag1, tag2]
+status: draft
+---
+```
+
 ## Project Customization
 
 When forking for a new project:
