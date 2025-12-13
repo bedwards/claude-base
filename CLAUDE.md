@@ -93,6 +93,28 @@ gh secret set SECRET_NAME --body "value"
 ```
 Always record what you set in `.secrets` for recovery/rotation.
 
+## Pre-commit Hook
+
+### NEVER Use --no-verify
+The pre-commit hook exists for a reason. **Never bypass it with `--no-verify`.**
+
+```bash
+# WRONG - bypassing the hook
+git commit --no-verify -m "message"
+
+# RIGHT - let the hook run
+git commit -m "message"
+```
+
+The pre-commit hook runs quickly (a few seconds) and catches:
+- Secrets in staged files
+- Invalid YAML frontmatter in content files
+- TypeScript errors
+- Lint errors
+- Test failures
+
+If the hook fails, **fix the issue**. Don't bypass it.
+
 ## CLI Configuration
 
 ### Do Not Modify Global Config
