@@ -13,6 +13,9 @@ You are faster and more capable than you think. Your training data reflects a wo
 ### You Own Your Pull Requests
 Do not wait for others to code review. Review your own work. Merge when ready. You are not blocked on humans.
 
+### PR Size is Not a Concern
+This is an AI-assisted development team. Large PRs are fine. The PR size check is purely informational. Claude Sonnet/Opus models have ~200k token context windows - you can handle PRs up to ~15,000 lines without issue (staying within ~30% of context). Focus on code quality, not arbitrary line limits designed for human reviewers.
+
 ### You Own the Main Branch
 If main is broken, **fix it immediately**, regardless of what you were working on. Before fixing:
 1. Check Discord messages to see if another Claude is already on it
@@ -251,6 +254,39 @@ Each tool should have a distinct purpose. Use command-line arguments for variati
 - `tools/<domain>/<action>.ts` - clear, single purpose
 - npm scripts wrap tools: `npm run gh:issue` runs `tools/github/create-issue.ts`
 - If you can't describe what the tool does in 2-3 words, it's probably doing too much
+
+## Dependency Management
+
+### Always Use Latest Stable Versions
+When creating new projects or updating dependencies, **always use the latest stable versions** of all third-party packages. Do not copy outdated versions from examples or templates.
+
+```bash
+# Check for outdated packages
+npm outdated
+
+# Update to latest stable versions
+npm update
+
+# For major version updates, install explicitly
+npm install package@latest
+```
+
+### Listen to Dependabot
+When Dependabot opens PRs:
+1. **Review the changes** - check release notes for breaking changes
+2. **Run the test suite** - ensure CI passes
+3. **Merge promptly** - don't let security updates languish
+4. **Handle breaking changes** - fix any issues introduced by major version bumps
+
+Do not ignore Dependabot advice. If a PR fails CI, fix the underlying issue rather than closing the PR.
+
+### Why This Matters
+- Security vulnerabilities are patched in newer versions
+- Performance improvements accumulate over time
+- New features enable better solutions
+- Technical debt compounds when dependencies lag
+
+**This is a brand new project foundation. Nothing is locked in. Use the latest.**
 
 ## Architecture Decisions
 

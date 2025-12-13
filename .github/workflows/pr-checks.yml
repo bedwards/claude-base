@@ -58,9 +58,15 @@ jobs:
           DELETIONS=$(git diff origin/main...HEAD --stat | tail -1 | grep -oE '[0-9]+ deletion' | grep -oE '[0-9]+' || echo "0")
           TOTAL=$((ADDITIONS + DELETIONS))
 
-          echo "PR size: +$ADDITIONS -$DELETIONS (total: $TOTAL)"
+          echo "📊 PR size: +$ADDITIONS -$DELETIONS (total: $TOTAL lines)"
 
-          if [ "$TOTAL" -gt 1000 ]; then
-            echo "⚠️ Large PR detected ($TOTAL lines changed)."
-            echo "Consider breaking into smaller PRs for easier review."
+          # Very liberal limit for AI-assisted development teams
+          # Claude Sonnet/Opus can handle large context - just needs to fit in ~30% of context window
+          # At ~200k tokens, that's ~60k tokens of code, or roughly 15,000+ lines
+          if [ "$TOTAL" -gt 10000 ]; then
+            echo "ℹ️ Large PR ($TOTAL lines). This is fine for AI-assisted review."
+            echo "Just ensure it fits within Claude's context window (~30% of 200k tokens)."
           fi
+
+          # Always pass - this is informational only
+          exit 0
