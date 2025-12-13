@@ -1,10 +1,16 @@
 # claude-base
 
-A foundation for Claude Code projects, built on principles from the [Anthropic Engineering Blog](https://www.anthropic.com/engineering).
+**A foundation for vibe coding with Claude.**
+
+Built on principles from the [Anthropic Engineering Blog](https://www.anthropic.com/engineering) and [AI 2027 projections](https://ai-2027.com) for teams where AI does most of the coding.
+
+This is **not** a human dev team workflow. No arbitrary PR size limits. No waiting for code review. No artificial constraints designed for human limitations. Claude Sonnet and Opus 4.5 can handle massive context windows and complex codebases—use that capability.
 
 ## What This Is
 
-A starting point for projects where Claude Code is a primary developer. Not a framework to learn—a foundation to build on.
+Vibe coding: you describe what you want, Claude builds it. No more wrestling with syntax, googling error messages, or debugging for hours. You guide the vision, Claude handles the implementation.
+
+This repo is the foundation for that workflow. Not a framework to learn—a starting point for projects where Claude Code is a primary developer.
 
 **This repo contains:**
 - Configuration for TypeScript, linting, testing (Vitest + Playwright)
@@ -96,9 +102,10 @@ claude-base/
 
 **Read [CLAUDE.md](./CLAUDE.md) completely before starting work.**
 
-Key points:
+You are a vibe coder. Key points:
 - You own your PRs—don't wait for human review
 - You own the main branch—fix it if it breaks
+- PR size doesn't matter—vibe code as fast as you can
 - Check Discord before acting on shared resources
 - Use the screenshot framework to verify UI work
 - Never commit secrets (pre-commit hook will block you)

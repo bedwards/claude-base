@@ -1,12 +1,14 @@
 ---
-title: The Quiet Revolution in How Software Gets Made
+title: Vibe Coding: The Quiet Revolution in How Software Gets Made
 subtitle: What Anthropic's engineering team learned about AI agents that changes everything
 date: 2025-12-13
-tags: [ai, software-engineering, agents, anthropic]
+tags: [ai, software-engineering, agents, anthropic, vibe-coding]
 status: draft
 ---
 
 Something fundamental shifted in software engineering this year, and most people missed it.
+
+They're calling it "vibe coding"—you describe what you want, the AI builds it. No more wrestling with syntax. No more googling error messages. No more debugging for hours. You guide the vision, Claude handles the implementation.
 
 Not the flashy announcements. Not the benchmark improvements. Something quieter and more consequential: we figured out how to make AI actually work alongside humans to build things.
 
@@ -232,7 +234,17 @@ The Anthropic engineering insights are about bridging that gap. They're unglamor
 
 That's the shift. Not smarter AI—we'll get that through continued research. But *usable* AI, today, for real work. The principles are known. The patterns are documented. The tools exist.
 
-What remains is building with them.
+## Vibe Coding Is Here
+
+The term "vibe coding" captures something important: the relationship between human and AI has inverted. Previously, AI assisted humans. Now humans guide AI.
+
+You don't need to know the syntax. You don't need to remember which library does what. You describe the vibe—what you want to feel like, work like, look like—and Claude figures out how to make it happen.
+
+This isn't speculation. It's the current state of affairs for anyone using Claude Code seriously. And according to [AI 2027 projections](https://ai-2027.com), capabilities will accelerate dramatically. The agents we have today are early versions of what's coming.
+
+Build your workflows now for how AI works, not how human teams work. Don't impose arbitrary constraints—no PR size limits, no waiting for code review from humans who can't keep up. Let Claude vibe code at the speed of thought.
+
+The foundation is ready. The patterns are documented. What remains is building with them.
 
 ---
 
