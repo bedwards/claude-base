@@ -36,7 +36,7 @@
     "prepare": "husky || true"
   },
   "dependencies": {
-    "dotenv": "^16.4.5",
+    "dotenv": "^17.2.3",
     "express": "^4.21.0",
     "pg": "^8.13.0",
     "zod": "^3.23.8"
