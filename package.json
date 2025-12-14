@@ -33,12 +33,15 @@
     "discord:read": "tsx tools/discord/read.ts",
     "gh:issue": "tsx tools/github/create-issue.ts",
     "gh:rate-limit": "tsx tools/github/check-rate-limit.ts",
+    "stripe:customer": "tsx tools/stripe/customers.ts",
+    "stripe:webhooks": "tsx tools/stripe/webhooks.ts",
     "prepare": "husky || true"
   },
   "dependencies": {
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "pg": "^8.13.0",
+    "stripe": "^20.0.0",
     "zod": "^4.1.13"
   },
   "devDependencies": {

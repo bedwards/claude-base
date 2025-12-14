@@ -471,6 +471,49 @@ These principles guide our approach. Sources linked.
 
 **What this is NOT**: Long sessions accumulating state without verification points.
 
+## Stripe Integration
+
+### Setup
+1. Get API keys from https://dashboard.stripe.com/apikeys
+2. Add to `.secrets` (gitignored):
+   ```
+   STRIPE_SECRET_KEY=sk_test_...
+   STRIPE_PUBLISHABLE_KEY=pk_test_...
+   STRIPE_WEBHOOK_SECRET=whsec_...
+   ```
+
+### Usage in Code
+```typescript
+import { getStripeClient, isStripeConfigured } from './tools/stripe/index.js';
+
+if (isStripeConfigured()) {
+  const stripe = getStripeClient();
+  const session = await stripe.checkout.sessions.create({
+    mode: 'payment',
+    line_items: [{ price: 'price_xxx', quantity: 1 }],
+    success_url: 'https://example.com/success',
+  });
+}
+```
+
+### Webhooks
+```typescript
+import { verifyWebhookSignature, WEBHOOK_EVENTS } from './tools/stripe/index.js';
+
+// In your Express route (use express.raw() for webhook body)
+const event = verifyWebhookSignature(req.body, req.headers['stripe-signature']);
+
+if (event.type === WEBHOOK_EVENTS.CHECKOUT_COMPLETED) {
+  // Handle successful checkout
+}
+```
+
+### CLI Tools
+```bash
+npm run stripe:customer -- --email user@example.com
+npm run stripe:webhooks  # Info about webhook event types
+```
+
 ## Quick Reference
 
 ```bash
@@ -497,6 +540,10 @@ npm run discord:read -- --limit 10
 npm run gh:rate-limit      # Check API limits
 npm run gh:issue -- --title "..." --labels "..."
 npx tsx tools/github/pr-comments.ts --pr <n>
+
+# Stripe
+npm run stripe:customer -- --email <email>
+npm run stripe:webhooks    # Webhook event info
 
 # Build & Deploy
 npm run build              # Build all
